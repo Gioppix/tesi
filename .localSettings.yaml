@@ -1,0 +1,19 @@
+defaultIndent: "    "
+
+modifyLineBreaks:
+    removeTrailingWhitespace: 1
+    removeMultipleSpaces: 1
+    condenseMultipleBlankLinesToOne: 1
+
+noIndentBlock:
+    verbatim: 1
+    Verbatim: 1
+    lstlisting: 1
+    comment: 1
+
+alwaysLookForItems: 1
+
+indentAfterItems:
+    itemize: 1
+    enumerate: 1
+    description: 1

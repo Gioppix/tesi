@@ -1,7 +1,3 @@
-// Folder-specific settings
-//
-// For a full list of overridable settings, and general information on folder-specific settings,
-// see the documentation: https://zed.dev/docs/configuring-zed#settings-files
 {
     "languages": {
         "LaTeX": {
@@ -9,6 +5,21 @@
                 "external": {
                     "command": "latexindent",
                     "arguments": ["-l", "-m"]
+                }
+            },
+            "soft_wrap": "editor_width",
+            "preferred_line_length": 160
+        }
+    },
+    "lsp": {
+        "texlab": {
+            "settings": {
+                "texlab": {
+                    "build": { "forwardSearchAfter": true, "onSave": true },
+                    "forwardSearch": {
+                        "executable": "/Applications/Skim.app/Contents/SharedSupport/displayline",
+                        "args": ["-r", "-g", "%l", "%p", "%f"]
+                    }
                 }
             }
         }

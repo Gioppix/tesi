@@ -1,1 +1,17 @@
 indent.log
+
+# LaTeX auxiliary files
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.toc
+*.synctex.gz
+
+# LaTeX output files
+*.pdf
+
+# EPS converted files
+*-eps-converted-to.pdf

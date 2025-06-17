@@ -1,0 +1,18 @@
+[
+    {
+        "label": "forward_search",
+        "command": "/Applications/Skim.app/Contents/SharedSupport/displayline -r -z -b $ZED_ROW $ZED_DIRNAME/$ZED_STEM.pdf",
+        "allow_concurrent_runs": false,
+        "reveal": "never",
+        "hide": "always"
+    },
+
+    {
+        "label": "latexmk_view",
+        "command": "cd src && latexmk -pdf main.tex && /Applications/Skim.app/Contents/SharedSupport/displayline -r -z -b $ZED_ROW main.pdf && echo hell",
+        "allow_concurrent_runs": false,
+        "reveal": "no_focus",
+        // "hide": "on_success",
+        "tags": ["latex-build"]
+    }
+]

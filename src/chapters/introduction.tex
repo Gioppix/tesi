@@ -1,0 +1,53 @@
+\chapter{Introduction}
+\label{cha:introduction}
+
+% \section{Abstract}
+
+% Context
+
+The messaging platform \textit{WhatsApp} recently released APIs to interact with the platform in a systematic manner. Notably, the ability to automatically send messages.
+This enables businesses to leverage WhatsApp as an alternative communication channel to emails, which have become increasingly saturated and suffer from declining engagement rates.
+WhatsApp offers significantly higher open and response rates, providing a substantially improved return on investment. Furthermore, WhatsApp can now support the same marketing capabilities as email platforms, including automated campaigns, customer segmentation, and targeted messaging.
+Among the industries that rely heavily on email marketing to drive revenue growth is online commerce; this thesis will focus on this particular niche.
+E-commerce businesses can easily establish automated messaging workflows, and customers frequently engage with these communications by responding to the messages.
+
+% Problem
+
+However, this increased engagement presents both opportunities and challenges: e-commerce businesses must now manage a substantially larger volume of customer inquiries, many of which are tedious and do not require specialized knowledge nor complex actions.
+WhatsApp has platform-specific limitations that worsen this challenge: it enforces strict restrictions on message responses, particularly limiting businesses from responding to customer messages after a 24-hour window has elapsed since the last customer-initiated message \cite{wa_policy}.
+
+% Solution
+
+This thesis presents the implementation of an LLM-powered assistant capable of autonomously guiding customers through the purchase process by suggesting relevant available products, answering inquiries about order details including contents and shipping status, and providing information specific to the e-commerce business.
+The system also aids human intervention by prioritizing conversations and categorizing conversations to enable different departments to operate independently and efficiently.
+The architecture chosen for the assistant employs a 2-phase approach comprising \textit{Context Gathering} and \textit{Answer Generation}, where relevant context is retrieved between phases to narrow down the information provided to the final response generation.
+This architectural necessity enables the system to efficiently handle large product catalogs and order histories by first identifying relevant information and then generating appropriate responses based on that context.
+Since implementing such a system can be accomplished through various platforms, including no-code solutions, the primary contribution of this thesis lies in the validation.
+
+% Validation
+
+In particular, we focus on developing a systematic process that can automatically and objectively evaluate its performance, in function of the models chosen to complete the tasks. Evaluation covers five key dimensions, listed in order of priority:
+\begin{itemize}
+    \item Presence of hallucinations: instances where the model generates factually incorrect or fabricated information not supported by the provided context
+    \item Accuracy: the ability to correctly utilize provided contextual information and adhere to given instructions
+    \item Cost: computational expense measured in dollars per response, accounting for all model inference calls
+    \item Speed: response generation latency measured in seconds, including only model processing time
+\end{itemize}
+We validate each of the two phases separately, leveraging their independent operational capability (by providing standardized, synthetically generated context to the \textit{Answer Generation} phase).
+For each phase, the selected model processes multiple synthetic chat conversations, and its outputs are evaluated by another LLM operating as a judge (LLM-as-a-Judge), which has been manually fine-tuned to align with human preferences.
+The use of a secondary LLM for evaluation is necessary to assess accuracy, which cannot be measured through simple metrics like cost or speed.
+\tdin{Aggiungere risultati}
+
+\section{Outline}
+
+\tdin{check that content is correct}
+
+We begin by establishing the theoretical foundations in \cref{cha:background}, examining Large Language Models, the specific contextual requirements of e-commerce customer service, Retrieval Augmented Generation techniques, and vector database technologies that enable semantic search capabilities.
+
+\Cref{cha:impl} presents the core implementation of the assistant, detailing our 2-phase architecture comprising Context Gathering and Answer Generation phases. The Context Gathering phase uses RAG techniques and smaller models to efficiently select relevant information from product catalogs and order histories, while the Answer Generation phase covers output formatting strategies, available actions like message sending, conversation categorization and priority assessment.
+
+\Cref{cha:validation} focuses on the systematic evaluation process, describing how we automatically and objectively assess the system's performance across different model configurations, including the development of synthetic test datasets and the LLM-as-a-Judge evaluation methodology.
+
+Finally, \cref{cha:conclusion} synthesizes our findings regarding the evaluation framework and its results, complete with trade-offs between accuracy, cost, speed, and environmental impact in different LLM models.
+
+% \Cref{cha:related-work} positions our work within the existing literature on automated customer service systems and LLM applications in commercial contexts.

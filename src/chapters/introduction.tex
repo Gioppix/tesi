@@ -5,10 +5,10 @@
 
 % Context
 
-The messaging platform \textit{WhatsApp} recently released APIs to interact with the platform in a systematic manner. Notably, the ability to automatically send messages.
-This enables businesses to leverage WhatsApp as an alternative communication channel to emails, which have become increasingly saturated and suffer from declining engagement rates.
-WhatsApp offers significantly higher open and response rates, providing a substantially improved return on investment. Furthermore, WhatsApp can now support the same marketing capabilities as email platforms, including automated campaigns, customer segmentation, and targeted messaging.
-Among the industries that rely heavily on email marketing to drive revenue growth is online commerce; this thesis will focus on this particular niche.
+E-commerce businesses rely heavily on email marketing to drive revenue growth, but emails have become increasingly saturated and suffer from declining engagement rates.
+This has created a pressing need for these businesses to find more effective communication channels to reach their customers.
+The messaging platform \textit{WhatsApp} recently released APIs to interact with the platform in a systematic manner, notably the ability to automatically send messages.
+This enables e-commerce businesses to leverage WhatsApp as an alternative communication channel that offers significantly higher open and response rates than email while supporting the same marketing capabilities including automated campaigns, customer segmentation, and targeted messaging.
 E-commerce businesses can easily establish automated messaging workflows, and customers frequently engage with these communications by responding to the messages.
 
 % Problem
@@ -18,7 +18,8 @@ WhatsApp has platform-specific limitations that worsen this challenge: it enforc
 
 % Solution
 
-This thesis presents the implementation of an LLM-powered assistant capable of autonomously guiding customers through the purchase process by suggesting relevant available products, answering inquiries about order details including contents and shipping status, and providing information specific to the e-commerce business.
+This thesis presents the implementation of an LLM-powered assistant for e-commerce customer service.
+The assistant autonomously guides customers through the purchase process by suggesting relevant products, answering order inquiries about contents and shipping status, and providing business-specific information.
 The system also aids human intervention by prioritizing conversations and categorizing conversations to enable different departments to operate independently and efficiently.
 The architecture chosen for the assistant employs a 2-phase approach comprising \textit{Context Gathering} and \textit{Answer Generation}, where relevant context is retrieved between phases to narrow down the information provided to the final response generation.
 This architectural necessity enables the system to efficiently handle large product catalogs and order histories by first identifying relevant information and then generating appropriate responses based on that context.
@@ -28,7 +29,7 @@ Since implementing such a system can be accomplished through various platforms, 
 
 In particular, we focus on developing a systematic process that can automatically and objectively evaluate its performance, in function of the models chosen to complete the tasks. Evaluation covers five key dimensions, listed in order of priority:
 \begin{itemize}
-    \item Presence of hallucinations: instances where the model generates factually incorrect or fabricated information not supported by the provided context
+    \item Hallucinations: instances where the model generates factually incorrect or fabricated information not supported by the provided context
     \item Accuracy: the ability to correctly utilize provided contextual information and adhere to given instructions
     \item Cost: computational expense measured in dollars per response, accounting for all model inference calls
     \item Speed: response generation latency measured in seconds, including only model processing time

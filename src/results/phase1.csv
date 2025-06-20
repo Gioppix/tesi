@@ -1,0 +1,13 @@
+model,Products Query Accurate,Orders Decision Accurate,Failure Rate,Avg Duration,Total Cost
+Claude Haiku 3.5,88.2,100.0,5.0,2.764,0.001006
+Claude Sonnet 4.0 *,97.5,98.8,0.0,9.567,0.006613
+Claude Sonnet 4.0,95.0,98.8,0.0,2.896,0.002050
+OpenAI o3-mini *,96.2,100.0,0.0,4.945,0.001142
+OpenAI o4-mini *,95.0,100.0,0.0,3.283,0.000518
+OpenAI o1 *,97.5,98.8,0.0,5.302,0.022228
+OpenAI GPT-4.1,98.8,100.0,0.0,1.345,0.000946
+Gemini 2.5 Pro *,96.2,98.8,0.0,6.859,0.005644
+Gemini 2.5 Flash *,95.0,97.5,0.0,3.318,0.001224
+Gemini 2.5 Flash,93.8,97.5,0.0,0.996,0.000202
+Gemini 2.5 Flash Lite *,96.2,97.5,0.0,1.535,0.000240
+Gemini 2.5 Flash Lite,95.0,100.0,0.0,0.641,0.000052

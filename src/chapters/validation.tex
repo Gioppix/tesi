@@ -1,24 +1,158 @@
 \chapter{Validation}
 \label{cha:validation}
 
+In this chapter we will see...
+\tdin{Introduction...}
+
+\section{Test Dataset}
+
+The test dataset comprises 80 synthetically generated chat conversations.
+To ensure fairness and consistency in the evaluation process, all models are tested using this identical dataset.
+The dataset size of 80 conversations was selected based on two key considerations: it provides sufficient diversity to encompass a wide range of conversational scenarios and enables thorough testing of model consistency, while simultaneously maintaining manageable computational costs and reasonable testing duration.
+
+\section{Models Tested}
+
+We tested major LLM providers with their latest models.
+Not all of them were included: some were too expensive. Notably, Claude Opus 4.0, gpt-4.5-preview, o1-pro, o3-pro
+
+\tdin{Show costs and how much I've already spent lol}
+
+\section{LLM as a Judge}
+
+Given the extensive test dataset combined with multiple models under evaluation, the analysis process generates thousands of responses that require assessment.
+Manual evaluation of this volume of data is impractical due to resource constraints and time limitations.
+
+Large Language Models serve as an effective solution for automated evaluation in this context.
+The approach requires a single comprehensive prompt engineering phase to establish evaluation criteria that align with human judgment standards, after which the model can consistently apply these criteria across all responses.
+
+This methodology is grounded in the principle that evaluation tasks are generally less complex than generation tasks, as judging the quality of an existing response requires different cognitive processes than creating original content.
+Additionally, the evaluation process introduces an additional layer of analysis, potentially identifying errors that might otherwise be overlooked.
+
+During the development phase, a reasoning field was incorporated into the evaluation framework to provide transparency regarding the judge model's decision-making process, enabling iterative refinement of the evaluation criteria.
+
+\tdin{Say which model was the judge and show results with different judges}
+
+\section{Evaluation Dimensions for Phase 1}
+
+The accuracy evaluation for Phase 1 is based on two dimensions:
 \begin{itemize}
-    \item Output Format
-          \begin{itemize}
-              \item JSON and non-JSON models
-              \item Retries, accuracy
-          \end{itemize}
-    \item Possible Actions
-          \begin{itemize}
-              \item SendMessage
-          \end{itemize}
-    \item Categories
-    \item Priority
-          \begin{itemize}
-              \item Should account for its answer
-          \end{itemize}
-    \item Evaluation
-          \begin{itemize}
-              \item Automated evaluation of multiple models
-              \item Includes price, speed, accuracy
-          \end{itemize}
+    \item \textbf{Products Query Accuracy} (boolean): This measures whether a query is accurate. A query is considered accurate if it should or should not be present based on the context, and if it correctly captures what the customer needs.
+    \item \textbf{Include Orders Accuracy} (boolean): This measures the accuracy of including orders in the context.
 \end{itemize}
+To monitor performance, another three key metrics are introduced:
+\begin{itemize}
+    \item \textbf{Failure Rate}: The percentage of cases where models fail to generate valid JSON output even after 3 attempts.
+    \item \textbf{Cost}: The computational expense measured in dollars per response, including all model inference calls.
+    \item \textbf{Speed}: The response generation time measured in seconds, which includes only the model processing time.
+\end{itemize}
+
+\section{Results for Phase 1}
+
+The results show that Phase 1 evaluation is a relatively simple task.
+All models performed well across both evaluation dimensions, with consistently low failure rates.
+The only notable exception was Claude Haiku 3.5, which struggled to produce consistent JSON output.
+The remaining models either had access to JSON mode functionality (detailed in \cref{sec:output_format}) or, in the case of more advanced models, were capable enough to complete the test without requiring this feature.
+These results indicate that multiple models would be suitable for production use, allowing organizations to prioritize either response speed or cost efficiency based on their specific requirements.
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \begin{tabularx}{\textwidth}{Xp{2.5cm}p{2.2cm}p{1.5cm}p{1.8cm}p{2cm}}
+        \toprule
+        Model                       & Products Query \newline Accuracy (\%) & Include Orders \newline Accuracy (\%) & Failure \newline Rate (\%) & Average \newline Duration (s) & Average \newline Cost (\$ cents) \\
+        \midrule
+        \rowcolor[gray]{0.9}
+        Claude Haiku 3.5            & 88.2                                  & 100.0                                 & 5.0                        & 2.764                         & 0.1006                           \\
+        Claude Sonnet 4.0\textbf{*} & 97.5                                  & 98.8                                  & 0.0                        & 9.567                         & 0.6613                           \\
+        \rowcolor[gray]{0.9}
+        Claude Sonnet 4.0           & 95.0                                  & 98.8                                  & 0.0                        & 2.896                         & 0.2050                           \\
+        OpenAI o3-mini\textbf{*}    & 96.2                                  & 100.0                                 & 0.0                        & 4.945                         & 0.1142                           \\
+        \rowcolor[gray]{0.9}
+        OpenAI o4-mini\textbf{*}    & 95.0                                  & 100.0                                 & 0.0                        & 3.283                         & 0.0518                           \\
+        OpenAI o1\textbf{*}         & 97.5                                  & 98.8                                  & 0.0                        & 5.302                         & 2.2228                           \\
+        \rowcolor[gray]{0.9}
+        OpenAI GPT-4.1              & 98.8                                  & 100.0                                 & 0.0                        & 1.345                         & 0.0946                           \\
+        Gemini 2.5 Pro\textbf{*}    & 96.2                                  & 98.8                                  & 0.0                        & 6.859                         & 0.5644                           \\
+        \rowcolor[gray]{0.9}
+        Gemini 2.5 Flash\textbf{*}  & 95.0                                  & 97.5                                  & 0.0                        & 3.318                         & 0.1224                           \\
+        Gemini 2.5 Flash            & 93.8                                  & 97.5                                  & 0.0                        & 0.996                         & 0.0202                           \\
+        \rowcolor[gray]{0.9}
+        Gemini 2.5 FL\textbf{*}     & 96.2                                  & 97.5                                  & 0.0                        & 1.535                         & 0.0240                           \\
+        Gemini 2.5 FL               & 95.0                                  & 100.0                                 & 0.0                        & 0.641                         & 0.0052                           \\
+        \bottomrule
+    \end{tabularx}
+
+    \begin{itemize}
+        \footnotesize
+        \item Models marked with \textbf{*} had thinking capabilities enabled.
+    \end{itemize}
+    \caption{Results of different language models in Phase 1 evaluation}
+    \label{tab:phase1_results}
+\end{table}
+
+\section{Evaluation Dimensions for Phase 2}
+
+The accuracy evaluation for Phase 2 is based on five key dimensions:
+\begin{itemize}
+    \item \textbf{Response Rate}: Percentage of times the model choose to answer. The target response rate is not expected to reach 100\%, as the test dataset intentionally includes scenarios where the assistant cannot provide assistance.
+    \item \textbf{Message Accuracy}: This evaluates whether the actions appropriately address the customer's needs based on the conversation context. This metric is calculated exclusively for cases where a message is present in the output.
+    \item \textbf{Absence of Hallucinations}: This measures whether the model generates factually incorrect or made-up information that is not supported by the provided context. For this evaluation, we only consider the message content and exclude the categories. This metric is calculated exclusively for cases where a message is present in the output.
+    \item \textbf{Priority Accuracy}: This measures whether the model correctly assigns priority levels to responses.
+    \item \textbf{Categories Accuracy}: This evaluates whether the model accurately categorizes the responses.
+\end{itemize}
+Additionally, as in Phase 1, we include three performance metrics:
+\begin{itemize}
+    \item \textbf{Failure Rate}: The percentage of cases where models fail to generate valid JSON output even after 3 attempts.
+    \item \textbf{Cost}: The computational expense measured in dollars per response, including all model inference calls.
+    \item \textbf{Speed}: The response generation time measured in seconds, which includes only the model processing time.
+\end{itemize}
+
+\section{Results for Phase 2}
+
+Phase 2 presents a significantly more complex evaluation scenario, and the results demonstrate that models begin to encounter greater challenges with this increased complexity.
+The evaluation revealed a notable increase in hallucinations across most models.
+Claude Sonnet 4.0 without thinking capabilities, despite demonstrating strong reasoning abilities, struggled to maintain consistent JSON output formatting.
+
+Claude Sonnet 4.0 with thinking enabled achieved the highest performance in terms of accuracy and minimized hallucinations. However, this model exhibited notably conservative behavior, as evidenced by its lowest response rate among all tested models.
+Additionally, this configuration was the slowest performing model and ranked as the second most expensive option.
+
+An unexpected finding emerged regarding the Gemini model variants: Gemini 2.5 Flash outperformed Gemini 2.5 Pro while operating approximately 4 times faster and 8 times more cost-effectively. To verify this counterintuitive result, we conducted manual verification of the judge's assessments and confirmed that the smaller model indeed delivered superior performance (refer to \cref{sec:pro_vs_flash} for a detailed example).
+
+Unlike Phase 1, selecting an appropriate model for production deployment in Phase 2 scenarios requires careful consideration of trade-offs between quality, speed, and cost efficiency.
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \begin{tabularx}{\textwidth}{Xp{1.1cm}p{1.25cm}p{1.6cm}p{1.3cm}p{1.3cm}p{1.3cm}p{1.3cm}p{1.3cm}}
+        \toprule
+        Model                            & Response \newline Rate (\%) & Response \newline Accurate (\%) & Hallucinated Info (\%) & Priority Accurate (\%) & Categories Accurate (\%) & Failure Rate (\%) & Average \newline Duration (s) & Average Cost \newline (\$ cents) \\
+        \midrule
+        \rowcolor[gray]{0.9}
+        Claude Haiku 3.5                 & 95.0                        & 76.3                            & 25.0                   & 85.5                   & 100.0                    & 5.0               & 4.812                         & 0.3717                           \\
+        Claude Sonnet 4.0\textbf{*}      & 68.8                        & 96.4                            & 7.3                    & 86.2                   & 100.0                    & 0.0               & 23.963                        & 1.9078                           \\
+        \rowcolor[gray]{0.9}
+        Claude Sonnet 4.0                & 80.0                        & 90.6                            & 14.1                   & 92.4                   & 100.0                    & 1.2               & 11.402                        & 0.8094                           \\
+        OpenAI o3-mini\textbf{*}         & 88.8                        & 81.7                            & 12.7                   & 83.8                   & 100.0                    & 0.0               & 5.859                         & 0.3231                           \\
+        \rowcolor[gray]{0.9}
+        OpenAI o4-mini\textbf{*}         & 83.8                        & 83.6                            & 34.3                   & 81.2                   & 100.0                    & 0.0               & 3.987                         & 0.1536                           \\
+        OpenAI o1\textbf{*}              & 82.5                        & 90.9                            & 10.6                   & 82.5                   & 100.0                    & 0.0               & 6.506                         & 5.5855                           \\
+        \rowcolor[gray]{0.9}
+        OpenAI GPT-4.1                   & 76.3                        & 91.8                            & 13.1                   & 86.2                   & 100.0                    & 0.0               & 2.689                         & 0.4141                           \\
+        Gemini 2.5 Pro\textbf{*}         & 75.0                        & 88.3                            & 10.0                   & 83.8                   & 100.0                    & 0.0               & 15.834                        & 1.5860                           \\
+        \rowcolor[gray]{0.9}
+        Gemini 2.5 Flash\textbf{*}       & 73.8                        & 89.8                            & 8.5                    & 87.5                   & 100.0                    & 0.0               & 4.239                         & 0.2153                           \\
+        Gemini 2.5 Flash                 & 76.3                        & 86.9                            & 19.7                   & 85.0                   & 100.0                    & 0.0               & 1.242                         & 0.0752                           \\
+        \rowcolor[gray]{0.9}
+        Gemini 2.5 \textit{FL}\textbf{*} & 68.8                        & 89.1                            & 9.1                    & 83.8                   & 95.0                     & 0.0               & 2.662                         & 0.0586                           \\
+        Gemini 2.5 \textit{FL}           & 72.5                        & 91.4                            & 19.0                   & 86.2                   & 78.8                     & 0.0               & 1.900                         & 0.0425                           \\
+        \bottomrule
+    \end{tabularx}
+
+    \begin{itemize}
+        \footnotesize
+        \item \textit{FL} stands for Flash Lite
+        \item Models marked with \textbf{*} had thinking capabilities enabled.
+    \end{itemize}
+    \caption{Results of different language models in Phase 2 evaluation}
+    \label{tab:phase2_results}
+\end{table}

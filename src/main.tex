@@ -9,6 +9,17 @@
 \usepackage{hyperref}
 \usepackage{cleveref}
 \usepackage{enumitem}
+\usepackage{tabularray}
+\usepackage{csvsimple}
+\usepackage{adjustbox}
+\usepackage{pgfplotstable}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{array}
+\usepackage{float}
+\usepackage{tabularx}
+
 \setlist{noitemsep,topsep=0pt}
 \linenumbers
 
@@ -76,6 +87,9 @@
 \input{chapters/validation}
 
 \newpage
+\input{chapters/conclusion}
+
+\newpage
 \input{chapters/related_work}
 
 \newpage
@@ -119,7 +133,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \titleformat{\chapter}
-{\normalfont\Huge\bfseries}{Attachments \thechapter}{1em}{}
+{\normalfont\huge\bfseries}{Attachments \thechapter}{1em}{}
 \appendix
 \input{attachments}
 

@@ -13,6 +13,7 @@ This approach represents a more sophisticated form of RAG (\cref{sec:rag}) that 
 This approach offers significant scalability advantages and provides a framework that can be extended to incorporate additional context categories as system requirements evolve.
 
 \section{Output Format Considerations}
+\label{sec:output_format}
 
 A critical design consideration for the implementation involves the output structure format. Since the LLM's output undergoes automatic parsing, it must maintain consistent structure with predefined fields that cannot be left to the model's discretion.
 
@@ -22,6 +23,8 @@ Some models do not support structured output formatting at all, requiring relian
 For this implementation, JSON was selected as the output format over alternatives such as XML due to its widespread support across different model providers.
 Models that do not support JSON mode (notably those from Anthropic) or those with intermediate capabilities (such as DeepSeek models) require additional prompt engineering.
 These models receive a TypeScript representation of the desired output format within their prompt, which provides a more compact specification than JSON Schema while maintaining sufficient flexibility for the system's requirements.
+Since these models are trained to output code formatted as Markdown, they typically wrap JSON responses in code blocks, requiring the removal of Markdown formatting from the beginning and end of the response.
+While prompt engineering techniques were explored to eliminate this behavior during development, they proved inconsistent across different queries and contexts, whereas simple string trimming provides a reliable solution for extracting the JSON content.
 
 \section{System Architecture Details}
 
@@ -50,9 +53,14 @@ The output structure consists of multiple components:
     \item A \textit{Priority} enumeration that indicates the urgency level of the conversation (ranging from no urgency to urgent human intervention required)
     \item A \textit{Mood} classification that captures the customer's emotional state
     \item A list of \textit{categories} that tag the conversation with relevant business classifications
-    \item An optional \textit{actions} array that may contain automated responses when the system determines it can provide valuable assistance without human intervention
+    \item An \textit{actions} array (that might be empty) containing the actions the model choose to take and their parameters
 \end{itemize}
 The use of enumerations for  \textit{Priority} and  \textit{Mood} provides significant advantages as they effectively constrain the model's output to predefined, valid options, ensuring consistency and reliability in the structured responses while preventing the generation of unexpected or malformed values.
+
+The actions array represents a flexible and scalable architectural design that enables future system expansion.
+Currently, the system implements a single action type for sending messages; however, the framework can be trivially extended to incorporate additional action types such as tag modification or checkout creation without requiring fundamental architectural changes.
+This structured approach also enhances the model's awareness of its operational context and decision-making process.
+During the development phase, empirical observations revealed that models would sometimes misuse an old \textit{message} field for commentary or justification purposes rather than customer-facing communication, a behavior that the structured action framework effectively eliminates.
 
 \subsection{Model Reliability and Error Mitigation}
 

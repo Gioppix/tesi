@@ -1,8 +1,7 @@
 \chapter{Background}
 \label{cha:background}
 
-This chapter establishes the theoretical foundations necessary for understanding the implementation and evaluation of an LLM-powered customer service assistant for e-commerce applications. We begin by examining the capabilities and limitations of Large Language Models in practical applications, followed by an analysis of the specific contextual requirements for e-commerce customer service automation. We then explore Retrieval Augmented Generation (RAG) techniques that enable LLMs to access external knowledge sources, and conclude with an overview of vector database technologies that provide the semantic search capabilities essential for efficient information retrieval in our system architecture.
-\tdin{Check updates}
+This chapter establishes the theoretical foundations necessary for understanding the implementation and evaluation of an LLM-powered customer service assistant for e-commerce applications.
 
 \section{Large Language Models}
 
@@ -25,7 +24,7 @@ In particular, three main categories of information are required to effectively 
 \section{Retrieval Augmented Generation}
 \label{sec:rag}
 
-RAG is a technique that combines information retrieval with language generation to provide more accurate and contextual responses.
+Retrieval Augmented Generation (RAG) is a technique that combines information retrieval with language generation to provide more accurate and contextual responses.
 The implementation of RAG follows a straightforward process: when a user submits a query, the system first converts the query into a vector representation and searches a vector database for semantically similar content.
 The most relevant information is then retrieved and provided as context to the LLM, which generates a response that incorporates this retrieved knowledge alongside its pre-trained capabilities.
 This approach allows LLMs to access up-to-date, domain-specific information that wasn't present in their original training data.

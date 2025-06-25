@@ -1,3 +1,5 @@
+.DS_Store
+
 indent.log
 
 # LaTeX auxiliary files
@@ -9,6 +11,9 @@ indent.log
 *.log
 *.toc
 *.synctex.gz
+main-blx.bib
+*.xml
+*.bcf
 
 # LaTeX output files
 *.pdf

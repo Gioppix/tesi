@@ -6,7 +6,7 @@ We examine the Context Gathering and Answer Generation phases, discuss output fo
 
 \section{The 2-Phase Architecture}
 
-An analysis of the pricing structures for Large Language Models used in this thesis \cite{gemini_pricing, anthropic_pricing, deepseek_pricing, openai_pricing} demonstrates that computational costs increase proportionally with the volume of context tokens processed by the model.
+An analysis of the pricing structures for Large Language Models used in this thesis \cite{gemini_pricing, anthropic_pricing, openai_pricing} demonstrates that computational costs increase proportionally with the volume of context tokens processed by the model.
 This observation highlighted a fundamental scalability challenge: most e-commerce platforms maintain catalogs containing hundreds to thousands of products and variations, making it impractical to include all available information in every model inference.
 
 To address this limitation we implemented a 2-phase architecture, where the Context Gathering Phase receives the conversation history as input and decides which contextual elements should be included in the subsequent Answer Generation Phase.
@@ -39,7 +39,7 @@ This phase could also be used to synthesize the chat history to optimize Phase 2
 
 \subsection{Intermediate Phase}
 
-When a query is generated during Phase 1, it is converted into embeddings using the same embedding model that was employed for the product catalog indexing, ensuring consistency in the vector space representation.
+When a query is generated during Phase 1, the same embedding model that was employed for the product catalog indexing converts it into an embedding, ensuring consistency in the vector space representation.
 A similarity search is then performed against the product catalog embeddings, with the top-N most relevant products being selected based on cosine similarity scores (a threshold is also used to avoid including unrelated information).
 These selected products, along with order information when requested, are subsequently formatted and passed to the Answer Generation Phase.
 
@@ -61,7 +61,7 @@ Currently, the system implements a single action type for sending messages; howe
 This structured approach also enhances the model's awareness of its operational context and decision-making process.
 During the development phase, empirical observations revealed that models would sometimes misuse an old \textit{message} field for commentary or justification purposes rather than customer-facing communication, a behavior that the structured action framework effectively eliminates.
 
-\subsection{Model Reliability and Error Mitigation}
+\section{Model Reliability and Error Mitigation}
 
 Both model calls in the two-phase architecture implement a retry mechanism with a maximum limit of three attempts to mitigate potential failures.
 The vast majority of failures encountered during system operation occur during the deserialization process, specifically in instances where language models fail to adhere to the specified output structure formats.

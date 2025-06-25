@@ -27,27 +27,30 @@ Since implementing such a system can be accomplished through various platforms, 
 
 % Validation
 
-In particular, we focus on developing a systematic process that can automatically and objectively evaluate its performance, in function of the models chosen to complete the tasks. Evaluation covers five key dimensions, listed in order of priority:
-\begin{itemize}
-    \item Hallucinations: instances where the model generates factually incorrect or fabricated information not supported by the provided context
-    \item Accuracy: the ability to correctly utilize provided contextual information and adhere to given instructions
-    \item Cost: computational expense measured in dollars per response, accounting for all model inference calls
-    \item Speed: response generation latency measured in seconds, including only model processing time
-\end{itemize}
+In particular, we focus on developing a systematic process that can automatically and objectively evaluate its performance, in function of the models chosen to complete the tasks.
+To do this, we test each model using a set of synthetic chat conversations and evaluate the results using another LLM that acts as a judge (technique known as LLM-as-a-Judge).
+The judge model has been carefully tuned through prompt engineering to match human evaluation standards, enabling consistent and reliable assessment of model performance across all test scenarios.
 We validate each of the two phases separately, leveraging their independent operational capability (by providing standardized, synthetically generated context to the \textit{Answer Generation} phase).
-For each phase, the selected model processes multiple synthetic chat conversations, and its outputs are evaluated by another LLM operating as a judge (LLM-as-a-Judge), which has been manually fine-tuned to align with human preferences.
-The use of a secondary LLM for evaluation is necessary to assess accuracy, which cannot be measured through simple metrics like cost or speed.
-\tdin{Aggiungere risultati}
+Evaluation covers different dimensions for each phase: for Phase 1, we evaluate the model's ability to correctly choose what context is needed and how to obtain it; for Phase 2, we evaluate the actual message response together with chat categorization and prioritization.
+Additionally, both phases are evaluated across three common performance metrics: failure rate, cost, and speed.
+
+Our results show that for Phase 1, which is a simpler task, smaller models performed best in terms of speed and cost while still achieving very good accuracy.
+For Phase 2, however, smaller models struggled to maintain quality and produced significantly more hallucinations.
+Among the larger models, there is no single best choice: organizations must balance between achieving the highest accuracy, minimizing costs, and optimizing response speed based on their specific requirements.
 
 \section{Outline}
 
 \tdin{check that content is correct}
 
-We begin by establishing the theoretical foundations in \cref{cha:background}, examining Large Language Models, the specific contextual requirements of e-commerce customer service, Retrieval Augmented Generation techniques, and vector database technologies that enable semantic search capabilities.
+We begin by establishing the theoretical foundations in \cref{cha:background}, covering the key technologies and concepts that underpin our assistant implementation.
 
-\Cref{cha:impl} presents the core implementation of the assistant, detailing our 2-phase architecture comprising Context Gathering and Answer Generation phases. The Context Gathering phase uses RAG techniques and smaller models to efficiently select relevant information from product catalogs and order histories, while the Answer Generation phase covers output formatting strategies, available actions like message sending, conversation categorization and priority assessment.
+\Cref{cha:impl} presents the core implementation of the assistant, detailing our 2-phase architecture that addresses computational cost scalability challenges.
+The Context Gathering phase analyzes conversation history to determine what contextual information is needed, while the Answer Generation phase uses this context to generate priority levels, mood classification, conversation categories, and actions.
+We also discuss output format considerations across different LLM providers and reliability mechanisms including retry logic for handling model inconsistencies.
 
-\Cref{cha:validation} focuses on the systematic evaluation process, describing how we automatically and objectively assess the system's performance across different model configurations, including the development of synthetic test datasets and the LLM-as-a-Judge evaluation methodology.
+\Cref{cha:validation} presents our systematic evaluation framework using synthetic chat conversations to assess multiple LLM models across major providers.
+We employ an LLM-as-a-Judge methodology for automated evaluation, testing both phases independently to measure accuracy, performance, and cost-effectiveness.
+The results show that Phase 1 can be handled by most models, while the more complex Phase 2 requires careful consideration of trade-offs between quality, speed, and cost.
 
 Finally, \cref{cha:conclusion} synthesizes our findings regarding the evaluation framework and its results, complete with trade-offs between accuracy, cost, speed, and environmental impact in different LLM models.
 

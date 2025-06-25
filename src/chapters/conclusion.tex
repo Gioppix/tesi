@@ -1,4 +1,33 @@
 \chapter{Conclusion}
 \label{cha:conclusion}
 
-\tdin{conclusion}
+This thesis demonstrates the implementation of an LLM-powered customer service assistant for e-commerce applications.
+We consider the implementation successful as it reached our targets of making multiple models achieve high accuracy levels across both phases while keeping average costs and response times to acceptable levels.
+
+The automated evaluation framework using LLM-as-a-Judge proved effective for systematic model comparison.
+We validated the judge's assessments through comparison with human judgment and found high agreement rates, confirming the reliability of our evaluation methodology.
+This framework provides a reproducible testing approach that can be used to evaluate new models as they become available, enabling ongoing comparison of model performance in customer service applications.
+
+\section{Future Work}
+
+The system can be extended with additional context and actions to build a more comprehensive assistant.
+Some examples include:
+\newline
+\textbf{Input Context Expansions}:
+\begin{itemize}
+    \item Current promotional campaigns and discount codes
+    \item Product reviews and ratings from other customers
+    \item Seasonal availability and restocking schedules
+    \item Customer loyalty program status and available rewards
+\end{itemize}
+\textbf{Output Action Expansions}:
+\begin{itemize}
+    \item Creating and updating support tickets with appropriate priority levels
+    \item Generating personalized discount codes for specific customers
+    \item Initiating refund processes and return merchandise authorizations
+    \item Updating customer preferences and communication settings
+    \item Adding products to wish lists or shopping carts
+    \item Subscribing customers to product availability notifications
+    \item Generating shipping labels and return instructions
+\end{itemize}
+It would be then interesting to see the results from the evaluation to check how models compare in more and more complex scenarios.

@@ -1,23 +1,31 @@
 \chapter{Validation}
 \label{cha:validation}
 
-In this chapter we will see...
-\tdin{Introduction...}
+This chapter presents the systematic evaluation of our LLM-powered customer service assistant using multiple models from major providers across both phases of our architecture.
+We employ an automated evaluation framework using synthetic chat conversations and LLM-as-a-Judge methodology to assess model performance across accuracy, cost, and speed dimensions.
+The evaluation reveals distinct performance characteristics between the simpler Context Gathering phase and the more complex Answer Generation phase, providing insights for production deployment decisions.
 
 \section{Test Dataset}
 
 The test dataset comprises 80 synthetically generated chat conversations.
 To ensure fairness and consistency in the evaluation process, all models are tested using this identical dataset.
-The dataset size of 80 conversations was selected based on two key considerations: it provides sufficient diversity to encompass a wide range of conversational scenarios and enables thorough testing of model consistency, while simultaneously maintaining manageable computational costs and reasonable testing duration.
 
-\section{Models Tested}
+The size of 80 conversations was selected based on two key considerations: it provides sufficient diversity to encompass a wide range of conversational scenarios and enables thorough testing of model consistency, while simultaneously maintaining manageable computational costs and reasonable testing duration.
 
-We tested major LLM providers with their latest models.
-Not all of them were included: some were too expensive. Notably, Claude Opus 4.0, gpt-4.5-preview, o1-pro, o3-pro
+\section{Models Under Evaluation}
 
-\tdin{Show costs and how much I've already spent lol}
+We tested major LLM providers using their latest available models.
+For models that supported both configurations, we evaluated them with Chain of Thoughts (CoT) reasoning enabled and disabled (see \cref{sec:thinking}).
+All models were configured with virtually unlimited output token limits, with the primary constraint being the thinking effort or thinking budget for models that support reasoning capabilities.
+Where possible, we tuned this thinking parameter to even out cost and response speed.
 
-\section{LLM as a Judge}
+However, not all available models were included in our evaluation due to cost constraints. Several high-end models were excluded:
+\begin{itemize}
+    \item \textbf{Anthropic}: Claude Opus 4.0 \cite{anthropic_pricing}
+    \item \textbf{OpenAI}: GPT 4.5, o1 Pro, o3 Pro \cite{openai_pricing}
+\end{itemize}
+
+\section{Automated Evaluation Using LLM-as-a-Judge}
 
 Given the extensive test dataset combined with multiple models under evaluation, the analysis process generates thousands of responses that require assessment.
 Manual evaluation of this volume of data is impractical due to resource constraints and time limitations.
@@ -25,28 +33,33 @@ Manual evaluation of this volume of data is impractical due to resource constrai
 Large Language Models serve as an effective solution for automated evaluation in this context.
 The approach requires a single comprehensive prompt engineering phase to establish evaluation criteria that align with human judgment standards, after which the model can consistently apply these criteria across all responses.
 
-This methodology is grounded in the principle that evaluation tasks are generally less complex than generation tasks, as judging the quality of an existing response requires different cognitive processes than creating original content.
-Additionally, the evaluation process introduces an additional layer of analysis, potentially identifying errors that might otherwise be overlooked.
+This methodology is grounded in the principle that evaluation tasks are generally less complex than generation tasks, as judging the quality of an existing response requires analyzing and assessing predetermined criteria rather than synthesizing new information from scratch.
+The evaluator model can focus exclusively on determining whether specific quality standards are met, without needing to balance creativity, factual accuracy, and contextual appropriateness simultaneously as required in generation tasks.
+Furthermore, this evaluation approach creates an extra layer of review, allowing the LLM to potentially identify errors that might have been missed, even when the same model evaluates its own generated responses.
 
 During the development phase, a reasoning field was incorporated into the evaluation framework to provide transparency regarding the judge model's decision-making process, enabling iterative refinement of the evaluation criteria.
 
-\tdin{Say which model was the judge and show results with different judges}
+We selected Claude Sonnet 4.0 with CoT enabled as our judge model because it demonstrated the best alignment with manual evaluation standards while maintaining cost-effectiveness.
+To validate this choice, we tested alternative models in the judge role and confirmed that the overall performance rankings remained consistent across different judges, with only minor variations comparable to those observed between human evaluators.
+Interestingly, we observed that judging models tended to assign slightly higher scores when evaluating responses generated by identical models. This phenomenon does not represent bias, as the judge model had no visibility into which model generated each response under evaluation.
+We attribute this alignment to consistent interpretation of instructions between identical models (for instance, how each model defines concepts such as hallucination).
+While our evaluation prompts are comprehensive and detailed, some degree of interpretive variation is inherent in any evaluation process.
 
-\section{Evaluation Dimensions for Phase 1}
+\section{Phase 1 Evaluation}
 
 The accuracy evaluation for Phase 1 is based on two dimensions:
 \begin{itemize}
-    \item \textbf{Products Query Accuracy} (boolean): This measures whether a query is accurate. A query is considered accurate if it should or should not be present based on the context, and if it correctly captures what the customer needs.
-    \item \textbf{Include Orders Accuracy} (boolean): This measures the accuracy of including orders in the context.
+    \item \textbf{Products Query Accuracy}: This measures whether a query is accurate. A query is considered accurate if it is absent when not needed, or if it is present when needed and correctly captures what the customer requires.
+    \item \textbf{Include Orders Accuracy}: This measures the accuracy of including past orders in the context.
 \end{itemize}
 To monitor performance, another three key metrics are introduced:
 \begin{itemize}
-    \item \textbf{Failure Rate}: The percentage of cases where models fail to generate valid JSON output even after 3 attempts.
-    \item \textbf{Cost}: The computational expense measured in dollars per response, including all model inference calls.
+    \item \textbf{Failure Rate}: The percentage of cases where models fail to generate valid JSON output for all 3 attempts.
+    \item \textbf{Cost}: The computational expense measured in dollars per response, including only model inference calls.
     \item \textbf{Speed}: The response generation time measured in seconds, which includes only the model processing time.
 \end{itemize}
 
-\section{Results for Phase 1}
+\subsection{Results for Phase 1}
 
 The results show that Phase 1 evaluation is a relatively simple task.
 All models performed well across both evaluation dimensions, with consistently low failure rates.
@@ -84,43 +97,45 @@ These results indicate that multiple models would be suitable for production use
 
     \begin{itemize}
         \footnotesize
-        \item Models marked with \textbf{*} had thinking capabilities enabled.
+        \item Models marked with \textbf{*} had CoT enabled.
     \end{itemize}
     \caption{Results of different language models in Phase 1 evaluation}
     \label{tab:phase1_results}
 \end{table}
 
-\section{Evaluation Dimensions for Phase 2}
+\section{Phase 2 Evaluation}
 
 The accuracy evaluation for Phase 2 is based on five key dimensions:
 \begin{itemize}
-    \item \textbf{Response Rate}: Percentage of times the model choose to answer. The target response rate is not expected to reach 100\%, as the test dataset intentionally includes scenarios where the assistant cannot provide assistance.
+    \item \textbf{Response Rate}: Percentage of times the model chooses to provide a response. A 100\% response rate is not the target, as the test dataset deliberately includes scenarios where the customer service assistant should abstain from responding. Higher response rates are only beneficial when accompanied by high accuracy and low hallucination rates.
     \item \textbf{Message Accuracy}: This evaluates whether the actions appropriately address the customer's needs based on the conversation context. This metric is calculated exclusively for cases where a message is present in the output.
     \item \textbf{Absence of Hallucinations}: This measures whether the model generates factually incorrect or made-up information that is not supported by the provided context. For this evaluation, we only consider the message content and exclude the categories. This metric is calculated exclusively for cases where a message is present in the output.
-    \item \textbf{Priority Accuracy}: This measures whether the model correctly assigns priority levels to responses.
-    \item \textbf{Categories Accuracy}: This evaluates whether the model accurately categorizes the responses.
+    \item \textbf{Priority Accuracy}: This measures whether the model correctly assigns priority levels to chats.
+    \item \textbf{Categories Accuracy}: This evaluates whether the model accurately categorizes the chats.
 \end{itemize}
 Additionally, as in Phase 1, we include three performance metrics:
 \begin{itemize}
-    \item \textbf{Failure Rate}: The percentage of cases where models fail to generate valid JSON output even after 3 attempts.
-    \item \textbf{Cost}: The computational expense measured in dollars per response, including all model inference calls.
-    \item \textbf{Speed}: The response generation time measured in seconds, which includes only the model processing time.
+    \item \textbf{Failure Rate}
+    \item \textbf{Cost}
+    \item \textbf{Speed}
 \end{itemize}
 
-\section{Results for Phase 2}
+\subsection{Results for Phase 2}
 
 Phase 2 presents a significantly more complex evaluation scenario, and the results demonstrate that models begin to encounter greater challenges with this increased complexity.
 The evaluation revealed a notable increase in hallucinations across most models.
+
 Claude Sonnet 4.0 without thinking capabilities, despite demonstrating strong reasoning abilities, struggled to maintain consistent JSON output formatting.
+Claude Sonnet 4.0 with thinking enabled achieved the highest performance in terms of accuracy and minimized hallucinations.
+However, this model exhibited notably conservative behavior, as evidenced by its lowest response rate among all tested models; additionally, this configuration was the slowest performing model and ranked as the second most expensive option.
+While this performance might initially appear to be influenced by the fact that Claude Sonnet 4.0 also served as the judge model, we confirmed this result by conducting additional evaluations using a Gemini model as the judge.
 
-Claude Sonnet 4.0 with thinking enabled achieved the highest performance in terms of accuracy and minimized hallucinations. However, this model exhibited notably conservative behavior, as evidenced by its lowest response rate among all tested models.
-Additionally, this configuration was the slowest performing model and ranked as the second most expensive option.
-
-An unexpected finding emerged regarding the Gemini model variants: Gemini 2.5 Flash outperformed Gemini 2.5 Pro while operating approximately 4 times faster and 8 times more cost-effectively. To verify this counterintuitive result, we conducted manual verification of the judge's assessments and confirmed that the smaller model indeed delivered superior performance (refer to \cref{sec:pro_vs_flash} for a detailed example).
+An unexpected finding emerged regarding the Gemini model variants: Gemini 2.5 Flash outperformed Gemini 2.5 Pro while operating approximately 4 times faster and 8 times more cost-effectively.
+To verify this counterintuitive result, we conducted manual verification of the judge's assessments and confirmed that the smaller model indeed delivered superior performance (refer to \cref{sec:pro_vs_flash} for a detailed example).
 
 Unlike Phase 1, selecting an appropriate model for production deployment in Phase 2 scenarios requires careful consideration of trade-offs between quality, speed, and cost efficiency.
 
-\begin{table}[H]
+\begin{table}[h]
     \centering
     \footnotesize
     \begin{tabularx}{\textwidth}{Xp{1.1cm}p{1.25cm}p{1.6cm}p{1.3cm}p{1.3cm}p{1.3cm}p{1.3cm}p{1.3cm}}
@@ -151,7 +166,7 @@ Unlike Phase 1, selecting an appropriate model for production deployment in Phas
     \begin{itemize}
         \footnotesize
         \item \textit{FL} stands for Flash Lite
-        \item Models marked with \textbf{*} had thinking capabilities enabled.
+        \item Models marked with \textbf{*} had CoT enabled.
     \end{itemize}
     \caption{Results of different language models in Phase 2 evaluation}
     \label{tab:phase2_results}

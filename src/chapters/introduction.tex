@@ -18,10 +18,10 @@ WhatsApp has platform-specific limitations that worsen this challenge: it enforc
 
 % Solution
 
-This thesis presents the implementation of an LLM-powered assistant for e-commerce customer service.
+To address these issues, this thesis presents the implementation of an LLM-powered assistant for e-commerce customer service.
 The assistant autonomously guides customers through the purchase process by suggesting relevant products, answering order inquiries about contents and shipping status, and providing business-specific information.
 The system also aids human intervention by prioritizing conversations and categorizing conversations to enable different departments to operate independently and efficiently.
-The architecture chosen for the assistant employs a 2-phase approach comprising \textit{Context Gathering} and \textit{Answer Generation}, where relevant context is retrieved between phases to narrow down the information provided to the final response generation.
+The architecture we chose for the assistant employs a 2-phase approach comprising \textit{Context Gathering}, the first, and \textit{Answer Generation}, the second.
 This architectural necessity enables the system to efficiently handle large product catalogs and order histories by first identifying relevant information and then generating appropriate responses based on that context.
 Since implementing such a system can be accomplished through various platforms, including no-code solutions, the primary contribution of this thesis lies in the validation.
 
@@ -29,13 +29,13 @@ Since implementing such a system can be accomplished through various platforms, 
 
 In particular, we focus on developing a systematic process that can automatically and objectively evaluate its performance, in function of the models chosen to complete the tasks.
 To do this, we test each model using a set of synthetic chat conversations and evaluate the results using another LLM that acts as a judge (technique known as LLM-as-a-Judge).
-The judge model has been carefully tuned through prompt engineering to match human evaluation standards, enabling consistent and reliable assessment of model performance across all test scenarios.
+We carefully engineered the prompt used for the judge model to match human evaluation standards, enabling consistent and reliable assessment of model performance across all test scenarios.
 We validate each of the two phases separately, leveraging their independent operational capability (by providing standardized, synthetically generated context to the \textit{Answer Generation} phase).
-Evaluation covers different dimensions for each phase: for Phase 1, we evaluate the model's ability to correctly choose what context is needed and how to obtain it; for Phase 2, we evaluate the actual message response together with chat categorization and prioritization.
+Evaluation covers different dimensions for each phase: for the Context Gathering phase, we evaluate the ability of the model to correctly choose what context is needed and how to obtain it; for the Answer Generation Phase, we evaluate the actual message response together with chat categorization and prioritization.
 Additionally, both phases are evaluated across three common performance metrics: failure rate, cost, and speed.
 
-Our results show that for Phase 1, which is a simpler task, smaller models performed best in terms of speed and cost while still achieving very good accuracy.
-For Phase 2, however, smaller models struggled to maintain quality and produced significantly more hallucinations.
+Our results show that for the Context Gathering phase, which is a simpler task, smaller models performed best in terms of speed and cost while still achieving very good accuracy.
+For the Answer Generation phase, however, smaller models struggled to maintain quality and produced significantly more hallucinations.
 Among the larger models, there is no single best choice: organizations must balance between achieving the highest accuracy, minimizing costs, and optimizing response speed based on their specific requirements.
 
 \section{Outline}
@@ -43,13 +43,13 @@ Among the larger models, there is no single best choice: organizations must bala
 We begin by establishing the theoretical foundations in \cref{cha:background}, covering the key technologies and concepts that underpin our assistant implementation.
 
 \Cref{cha:impl} presents the core implementation of the assistant, detailing our 2-phase architecture that addresses computational cost scalability challenges.
-The Context Gathering phase analyzes conversation history to determine what contextual information is needed, while the Answer Generation phase uses this context to generate priority levels, mood classification, conversation categories, and actions.
-We also discuss output format considerations across different LLM providers and reliability mechanisms including retry logic for handling model inconsistencies.
+The Context Gathering phase (\cref{sec:context-gathering}) analyzes conversation history to determine what contextual information is needed, while the Answer Generation phase (\cref{sec:answer-generation}) uses this context to generate priority levels, mood classification, conversation categories, and actions.
+We also discuss output format considerations (\cref{sec:output_format}) across different LLM providers and reliability mechanisms (\cref{sec:reliability}) including retry logic for handling model inconsistencies.
 
 \Cref{cha:validation} presents our systematic evaluation framework using synthetic chat conversations to assess multiple LLM models across major providers.
-We employ an LLM-as-a-Judge methodology for automated evaluation, testing both phases independently to measure accuracy, performance, and cost-effectiveness.
-The results show that Phase 1 can be handled by most models, while the more complex Phase 2 requires careful consideration of trade-offs between quality, speed, and cost.
+We employ an LLM-as-a-Judge methodology (\cref{sec:llm-judge}) for automated evaluation, testing both phases independently to measure accuracy, performance, and cost-effectiveness.
+The results (\cref{sec:cg-results}, \cref{sec:ag-results}) show that the first phase can be handled by most models, while the more complex second phase requires careful consideration of trade-offs between quality, speed, and cost.
 
-% \Cref{cha:related-work} positions our work within the existing literature on automated customer service systems and LLM applications in commercial contexts.
+\Cref{cha:related-work} examines how this thesis builds upon and extends existing research in RAG techniques and LLM-as-a-Judge methodologies, with particular focus on their application to customer service automation.
 
-Finally, \cref{cha:conclusion} presents our considerations and potential extensions to enhance the system's capabilities.
+Finally, \cref{cha:conclusion} presents our considerations and potential extensions to enhance the capabilities of the system.

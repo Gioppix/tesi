@@ -2,10 +2,13 @@
 \label{cha:validation}
 
 This chapter presents the systematic evaluation of our LLM-powered customer service assistant using multiple models from major providers across both phases of our architecture.
-We employ an automated evaluation framework using synthetic chat conversations and LLM-as-a-Judge methodology to assess model performance across accuracy, cost, and speed dimensions.
-The evaluation reveals distinct performance characteristics between the simpler Context Gathering phase and the more complex Answer Generation phase, providing insights for production deployment decisions.
+We begin by describing our test dataset (\cref{sec:dataset}) and the models under evaluation (\cref{sec:models}).
+We then detail our automated evaluation framework using LLM-as-a-Judge methodology (\cref{sec:llm-judge}) to assess model performance across various accuracy dimensions.
+The evaluation covers the Context Gathering phase (\cref{sec:cg-eval}) with its results (\cref{sec:cg-results}), followed by the Answer Generation phase (\cref{sec:ag-eval}) and its results (\cref{sec:ag-results}).
+Our findings reveal distinct performance characteristics between the simpler Context Gathering phase and the more complex Answer Generation phase, providing insights for production deployment decisions as discussed in \cref{sec:hypothetical}.
 
 \section{Test Dataset}
+\label{sec:dataset}
 
 The test dataset comprises 80 synthetically generated chat conversations.
 To ensure fairness and consistency in the evaluation process, all models are tested using this identical dataset.
@@ -13,31 +16,33 @@ To ensure fairness and consistency in the evaluation process, all models are tes
 The size of 80 conversations was selected based on two key considerations: it provides sufficient diversity to encompass a wide range of conversational scenarios and enables thorough testing of model consistency, while simultaneously maintaining manageable computational costs and reasonable testing duration.
 
 \section{Models Under Evaluation}
+\label{sec:models}
 
 We tested major LLM providers using their latest available models.
 For models that supported both configurations, we evaluated them with built-in Chain of Thoughts (CoT) reasoning enabled and disabled (see \cref{sec:thinking}).
 All models were configured with virtually unlimited output token limits, with the primary constraint being the thinking effort or thinking budget for models that support reasoning capabilities.
 Where possible, we tuned this thinking parameter to even out cost and response speed.
-
-However, not all available models were included in our evaluation due to cost constraints. Several high-end models were excluded:
+However, we excluded certain high-end models from our evaluation due to cost constraints.
+Some examples include:
 \begin{itemize}
     \item \textbf{Anthropic}: Claude Opus 4.0 \cite{anthropic_pricing}
     \item \textbf{OpenAI}: GPT 4.5, o1 Pro, o3 Pro \cite{openai_pricing}
 \end{itemize}
 
 \section{Automated Evaluation Using LLM-as-a-Judge}
+\label{sec:llm-judge}
 
 Given the extensive test dataset combined with multiple models under evaluation, the analysis process generates thousands of responses that require assessment.
 Manual evaluation of this volume of data is impractical due to resource constraints and time limitations.
 
 Large Language Models serve as an effective solution for automated evaluation in this context.
-The approach requires a single comprehensive prompt engineering phase to establish evaluation criteria that align with human judgment standards, after which the model can consistently apply these criteria across all responses (as J. Gu et al. \cite{llmasajudge} presents).
+The approach requires a single comprehensive prompt engineering phase to establish evaluation criteria that align with human judgment standards, after which the model can consistently apply these criteria across all responses (as J. Gu et al. \cite{llmasajudge_survey} presents).
 
 This methodology is grounded in the principle that evaluation tasks are generally less complex than generation tasks, as judging the quality of an existing response requires analyzing and assessing predetermined criteria rather than synthesizing new information from scratch.
 The evaluator model can focus exclusively on determining whether specific quality standards are met, without needing to balance creativity, factual accuracy, and contextual appropriateness simultaneously as required in generation tasks.
 Furthermore, this evaluation approach creates an extra layer of review, allowing the LLM to potentially identify errors that might have been missed, even when the same model evaluates its own generated responses.
 
-During the development phase, a reasoning field was incorporated into the evaluation framework to provide transparency regarding the judge model's decision-making process, enabling iterative refinement of the evaluation criteria.
+During the development phase, a reasoning field was incorporated into the evaluation framework to provide transparency regarding the decision-making process of the judge model, enabling iterative refinement of the evaluation criteria.
 
 We selected Claude Sonnet 4.0 with built-in CoT enabled as our judge model because it demonstrated the best alignment with manual evaluation standards while maintaining cost-effectiveness.
 To validate this choice, we tested alternative models in the judge role and confirmed that the overall performance rankings remained consistent across different judges, with only minor variations comparable to those observed between human evaluators.
@@ -45,9 +50,10 @@ Interestingly, we observed that judging models tended to assign slightly higher 
 We attribute this alignment to consistent interpretation of instructions between identical models (for instance, how each model defines concepts such as hallucination).
 While our evaluation prompts are comprehensive and detailed, some degree of interpretive variation is inherent in any evaluation process.
 
-\section{Phase 1 Evaluation}
+\section{Context Gathering Phase Evaluation}
+\label{sec:cg-eval}
 
-The accuracy evaluation for Phase 1 is based on two dimensions:
+The accuracy evaluation for the Context Gathering phase is based on two dimensions:
 \begin{itemize}
     \item \textbf{Products Query Accuracy}: This measures whether a query is accurate. A query is considered accurate if it is absent when not needed, or if it is present when needed and correctly captures what the customer requires.
     \item \textbf{Include Orders Accuracy}: This measures the accuracy of including past orders in the context.
@@ -59,13 +65,10 @@ To monitor performance, another three key metrics are introduced:
     \item \textbf{Speed}: The response generation time measured in seconds, which includes only the model processing time.
 \end{itemize}
 
-\subsection{Results for Phase 1}
+\subsection{Results for the Context Gathering Phase}
+\label{sec:cg-results}
 
-The results show that Phase 1 evaluation is a relatively simple task.
-All models performed well across both evaluation dimensions, with consistently low failure rates.
-The only notable exception was Claude Haiku 3.5, which struggled to produce consistent JSON output.
-The remaining models either had access to JSON mode functionality (detailed in \cref{sec:output_format}) or, in the case of more advanced models, were capable enough to complete the test without requiring this feature.
-These results indicate that multiple models would be suitable for production use, allowing organizations to prioritize either response speed or cost efficiency based on their specific requirements.
+The results show that the Context Gathering phase is a relatively simple task.
 
 \begin{table}[H]
     \centering
@@ -99,13 +102,24 @@ These results indicate that multiple models would be suitable for production use
         \footnotesize
         \item Models marked with \textbf{*} had built-in CoT enabled.
     \end{itemize}
-    \caption{Results of different language models in Phase 1 evaluation}
-    \label{tab:phase1_results}
 \end{table}
 
-\section{Phase 2 Evaluation}
+All models performed well across both evaluation dimensions, with consistently low failure rates.
+The only notable exception was Claude Haiku 3.5, which struggled to produce consistent JSON output.
+The remaining models either had access to JSON mode functionality (detailed in \cref{sec:output_format}) or, in the case of more advanced models, were capable enough to complete the test without requiring this feature.
 
-The accuracy evaluation for Phase 2 is based on five key dimensions:
+These results demonstrate that multiple models are suitable for production deployment, enabling organizations to optimize for either response speed or cost efficiency according to their specific requirements.
+The analysis suggests that larger and more expensive models should be excluded from consideration, as they provide no significant performance advantage relative to their increased cost.
+
+The results show that \textit{OpenAI GPT-4.1} achieved the highest accuracy scores while ranking as the fifth most cost-effective and fourth fastest model.
+This performance may be attributed to its operation without CoT reasoning.
+The smaller Gemini models also demonstrated strong performance, achieving both the fastest response times and lowest costs. However, this efficiency comes with a trade-off of several percentage points in accuracy.
+Some E-commerce platforms could benefit from these cost savings.
+
+\section{Answer Generation Phase Evaluation}
+\label{sec:ag-eval}
+
+The accuracy evaluation for the Answer Generation phase is based on five key dimensions:
 \begin{itemize}
     \item \textbf{Response Rate}: Percentage of times the model chooses to provide a response. A 100\% response rate is not the target, as the test dataset deliberately includes scenarios where the customer service assistant should abstain from responding. Higher response rates are only beneficial when accompanied by high accuracy and low hallucination rates.
     \item \textbf{Message Accuracy}: This evaluates whether the actions appropriately address the customer's needs based on the conversation context. This metric is calculated exclusively for cases where a message is present in the output.
@@ -113,29 +127,15 @@ The accuracy evaluation for Phase 2 is based on five key dimensions:
     \item \textbf{Priority Accuracy}: This measures whether the model correctly assigns priority levels to chats.
     \item \textbf{Categories Accuracy}: This evaluates whether the model accurately categorizes the chats.
 \end{itemize}
-Additionally, as in Phase 1, we include three performance metrics:
-\begin{itemize}
-    \item \textbf{Failure Rate}
-    \item \textbf{Cost}
-    \item \textbf{Speed}
-\end{itemize}
+Additionally, as in the first phase, we include the same three performance metrics: \textit{Failure Rate}, \textit{Cost} and \textit{Speed}.
 
-\subsection{Results for Phase 2}
+\subsection{Results for the Answer Generation Phase}
+\label{sec:ag-results}
 
-Phase 2 presents a significantly more complex evaluation scenario, and the results demonstrate that models begin to encounter greater challenges with this increased complexity.
+The second phase presents a significantly more complex evaluation scenario, and the results demonstrate that models begin to encounter greater challenges with this increased complexity.
 The evaluation revealed a notable increase in hallucinations across most models.
 
-Claude Sonnet 4.0 without thinking capabilities, despite demonstrating strong reasoning abilities, struggled to maintain consistent JSON output formatting.
-Claude Sonnet 4.0 with thinking enabled achieved the highest performance in terms of accuracy and minimized hallucinations.
-However, this model exhibited notably conservative behavior, as evidenced by its lowest response rate among all tested models; additionally, this configuration was the slowest performing model and ranked as the second most expensive option.
-While this performance might initially appear to be influenced by the fact that Claude Sonnet 4.0 also served as the judge model, we confirmed this result by conducting additional evaluations using a Gemini model as the judge.
-
-An unexpected finding emerged regarding the Gemini model variants: Gemini 2.5 Flash outperformed Gemini 2.5 Pro while operating approximately 4 times faster and 8 times more cost-effectively.
-To verify this counterintuitive result, we conducted manual verification of the judge's assessments and confirmed that the smaller model indeed delivered superior performance (refer to \cref{sec:pro_vs_flash} for a detailed example).
-
-Unlike Phase 1, selecting an appropriate model for production deployment in Phase 2 scenarios requires careful consideration of trade-offs between quality, speed, and cost efficiency.
-
-\begin{table}[h]
+\begin{table}[H]
     \centering
     \footnotesize
     \begin{tabularx}{\textwidth}{Xp{1.1cm}p{1.25cm}p{1.6cm}p{1.3cm}p{1.3cm}p{1.3cm}p{1.3cm}p{1.3cm}}
@@ -168,6 +168,97 @@ Unlike Phase 1, selecting an appropriate model for production deployment in Phas
         \item \textit{FL} stands for Flash Lite
         \item Models marked with \textbf{*} had built-in CoT enabled.
     \end{itemize}
-    \caption{Results of different language models in Phase 2 evaluation}
-    \label{tab:phase2_results}
 \end{table}
+
+Claude Sonnet 4.0 without thinking capabilities, despite demonstrating strong reasoning abilities, struggled to maintain consistent JSON output formatting.
+Claude Sonnet 4.0 with thinking enabled achieved the highest performance in terms of accuracy and minimized hallucinations.
+However, this model exhibited notably conservative behavior, as evidenced by its lowest response rate among all tested models; additionally, this configuration was the slowest performing model and ranked as the second most expensive option.
+While this performance might initially appear to be influenced by the fact that Claude Sonnet 4.0 also served as the judge model, we confirmed this result by conducting additional evaluations using a Gemini model as the judge.
+
+An unexpected finding emerged regarding the Gemini model variants: Gemini 2.5 Flash outperformed Gemini 2.5 Pro while operating approximately 4 times faster and 8 times more cost-effectively.
+To verify this counterintuitive result, we conducted manual verification of the assessments made by the judge and confirmed that the smaller model indeed delivered superior performance (refer to \cref{sec:pro_vs_flash} for a detailed example).
+
+Unlike in the Context Gathering phase, selecting an appropriate model for production deployment requires careful consideration of trade-offs between quality, cost efficiency and speed.
+
+\section{Hypothetical Application Examples}
+\label{sec:hypothetical}
+
+We will now examine two hypothetical scenarios to illustrate practical considerations when selecting models for production deployment.
+To quantify the economic impact of model selection, we calculate what percentage of profit is consumed by the AI assistant's operational costs using the following formula.
+For this analysis, we assume that the Answer Generation accuracy is the only model characteristic that affects the Conversion Rate.
+
+% Define macros for the variables
+\newcommand{\avgMessages}{\overline{N}}
+\newcommand{\avgCostCG}{\overline{C}_{cg}}
+\newcommand{\avgCostAG}{\overline{C}_{ag}}
+\newcommand{\avgProfit}{\overline{P}}
+\newcommand{\convRate}{\textit{CR}}
+\newcommand{\modelAccuracy}{\alpha}
+
+\[
+    \textit{Profit Percentage} = \frac{\avgMessages \times (\avgCostCG + \avgCostAG)}{\avgProfit \times (\convRate \times \modelAccuracy^{\avgMessages})} \times 100\%
+\]
+
+where:
+\begin{itemize}
+    \item $\avgMessages$ = Average message count per conversion
+    \item $\avgCostCG$ = Average model cost per message, Context Gathering phase (\$)
+    \item $\avgCostAG$ = Average model cost per message, Answer Generation phase (\$)
+    \item $\avgProfit$ = Average Order Profit (AOP), excluding the model (\$)
+    \item $\convRate$ = Base Conversion Rate (CR) achieved by human assistants
+    \item $\modelAccuracy$ = Model accuracy
+\end{itemize}
+
+\paragraph*{E-commerce 1}
+
+Our first example considers an e-commerce platform specializing in digital stickers and printable art downloads, with extensive organic advertising that generates thousands of low-intent daily inquiries.
+This reflects in the metrics: $\avgMessages = 3$, $\avgProfit = \$6$, and $\convRate = 2\%$.
+For the Context Gathering phase, we select \textit{Gemini 2.5 Flash Lite} as it offers the lowest cost, which is essential given the e-commerce platform's constrained profit margins as demonstrated below.
+Using our formula, we see that:
+\begin{itemize}
+    \item \textit{OpenAI o1}
+          \begin{itemize}
+              \item $\avgCostAG = 5.5855$ cents per response, $\modelAccuracy = 90.9\%$
+              \item Total cost \textbf{186.1\%} of profit
+          \end{itemize}
+    \item \textit{Claude Sonnet 4.0 with CoT}
+          \begin{itemize}
+              \item $\avgCostAG = 1.9078$ cents per response, $\modelAccuracy = 96.4\%$
+              \item Total cost \textbf{53.4\%} of profit
+          \end{itemize}
+    \item \textit{Gemini 2.5 Flash with CoT}
+          \begin{itemize}
+              \item $\avgCostAG = 0.2153$ cents per response, $\modelAccuracy = 89.8\%$
+              \item Total cost \textbf{7.6\%} of profit
+          \end{itemize}
+\end{itemize}
+Due to the combination of low AOP and low CR, the unit economics make expensive models such as \textit{OpenAI o1} or \textit{Claude Sonnet 4.0} economically unviable.
+In this scenario, smaller models with CoT capabilities present a more suitable alternative. \textit{Gemini 2.5 Flash} demonstrated accurate response generation while maintaining one of the lowest hallucination rates among tested models, making it an excellent choice for cost-conscious deployments.
+
+\paragraph*{E-commerce 2}
+
+Our second example is a luxury furniture retailer specializing in high-end home goods with an Average Order Value of approximately \$300 and a highly targeted customer acquisition strategy.
+The metrics are: $\avgMessages = 5$, $\avgProfit = \$65.1$, and $\convRate = 15\%$.
+For the Context Gathering phase, we select \textit{OpenAI GPT-4.1} ($\avgCostCG = 0.0946$ cents) as it achieved the highest accuracy while maintaining low cost.
+Using our formula, we see that:
+\begin{itemize}
+    \item \textit{Claude Sonnet 4.0 with CoT}
+          \begin{itemize}
+              \item $\avgCostAG = 1.9078$ cents per response, $\modelAccuracy = 96.4\%$
+              \item Total cost \textbf{1.2\%} of profit
+          \end{itemize}
+    \item \textit{OpenAI GPT-4.1}
+          \begin{itemize}
+              \item $\avgCostAG = 0.4141$ cents per response, $\modelAccuracy = 91.8\%$
+              \item Total cost \textbf{0.4\%} of profit
+          \end{itemize}
+    \item \textit{OpenAI o1}
+          \begin{itemize}
+              \item $\avgCostAG = 5.5855$ cents per response, $\modelAccuracy = 90.9\%$
+              \item Total cost \textbf{4.7\%} of profit
+          \end{itemize}
+\end{itemize}
+Given the high AOV and the importance of maintaining brand perception through excellent customer service, this business can justify investing in premium models.
+\textit{Claude Sonnet 4.0} with CoT enabled would be an excellent choice despite its higher cost, as it demonstrated the highest accuracy and lowest hallucination rates while consuming only 1.1\% of profit.
+The conservative response behavior of this model (68.8\% response rate) is actually beneficial in this context, as it is better to escalate complex inquiries to human agents rather than risk providing incorrect information about high-value products.
+Alternatively, \textit{OpenAI GPT-4.1} offers a good balance of high accuracy (91.8\% response accuracy) with faster response times and moderate costs, consuming merely 0.4\% of profit, making it suitable for handling the majority of inquiries while maintaining quality standards.

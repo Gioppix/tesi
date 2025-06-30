@@ -1,2 +1,13 @@
 \chapter{Related Work}
 \label{cha:related-work}
+
+This thesis presents a specialization of existing techniques, along with targeted improvements for our specific use case.
+For example, our Context Gathering phase, as it represents a specialized implementation of RAG (Retrieval Augmented Generation).
+As Y.Gao et al. \cite{gao2023retrieval} demonstrate, numerous RAG techniques exist; however, our version is optimized for continuous support chat environments by filtering out outdated, resolved, and irrelevant data to focus exclusively on the customer's current needs.
+Another example is our application of the \textit{LLM-as-a-Judge} methodology: D. Li et al. \cite{llmasajudge_applications} provide a comprehensive taxonomy of research in this area.
+This thesis contributes a practical implementation with evaluation results, featuring specialized evaluation criteria tailored specifically to the e-commerce domain.
+
+In examining similar approaches to LLM deployment in customer service, Wulf et al. \cite{wulf2024exploringpotentiallargelanguage} present a practical implementation for telecommunications support, demonstrating feasibility through prototyping with actual customer data.
+Their cognitive task categorization parallels our Context Gathering and Answer Generation phases.
+While they focus on technical feasibility and manual validation, our implementation emphasizes autonomous evaluation via LLM-as-a-Judge methodology and business metrics, extending to comprehensive cost analysis and deployment scenarios for e-commerce.
+This addresses their identified gap for large-scale validation by providing a framework for model selection based on operational constraints and profit margins.

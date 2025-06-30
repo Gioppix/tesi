@@ -2,9 +2,11 @@
 \label{cha:impl}
 
 This chapter presents the core implementation of our LLM-powered assistant for e-commerce customer service, detailing the 2-phase architecture designed to address computational cost scalability challenges while maintaining high response quality.
-We examine the Context Gathering and Answer Generation phases, discuss output format considerations across different LLM providers, and describe the reliability mechanisms implemented to handle model inconsistencies.
+We examine the overall architecture (\cref{sec:architecture}), discuss output format considerations (\cref{sec:output_format}) across different LLM providers, and then detail the Context Gathering (\cref{sec:context-gathering}), Intermediate (\cref{sec:intermediate}), and Answer Generation (\cref{sec:answer-generation}) phases.
+Finally, we describe the reliability mechanisms (\cref{sec:reliability}) implemented to handle model inconsistencies.
 
 \section{The 2-Phase Architecture}
+\label{sec:architecture}
 
 An analysis of the pricing structures for Large Language Models used in this thesis \cite{gemini_pricing, anthropic_pricing, openai_pricing} demonstrates that computational costs increase proportionally with the volume of context tokens processed by the model.
 This observation highlighted a fundamental scalability challenge: most e-commerce platforms maintain catalogs containing hundreds to thousands of products and variations, making it impractical to include all available information in every model inference.
@@ -16,20 +18,26 @@ This approach offers significant scalability advantages and provides a framework
 \section{Output Format Considerations}
 \label{sec:output_format}
 
-A critical design consideration for the implementation involves the output structure format. Since the LLM's output undergoes automatic parsing, it must maintain consistent structure with predefined fields that cannot be left to the model's discretion.
+A critical design consideration for the implementation involves the output structure format.
+Since the output of the LLM undergoes automatic parsing, it must maintain consistent structure with predefined fields that cannot be left to the discretion of the model.
 
-Various LLM providers offer different levels of output formatting control. Some models provide a \textit{structured output} mode, which accepts a JSON schema and constrains the model's response to conform to the specified structure. Other models offer only a \textit{JSON mode} that enforces JSON formatting without a predefined schema structure.
+Various LLM providers offer different levels of output formatting control.
+Some models provide a \textit{structured output} mode, which accepts a JSON schema and constrains the response to conform to the specified structure.
+Other models offer only a \textit{JSON mode} that enforces JSON formatting without a predefined schema structure.
 Some models do not support structured output formatting at all, requiring reliance solely on prompt engineering techniques.
 
-For this implementation, JSON was selected as the output format over alternatives such as XML due to its widespread support across different model providers.
+For this implementation, we selected JSON as the output format over alternatives such as XML due to its widespread support across different model providers.
 Models that do not support JSON mode (notably those from Anthropic) or those with intermediate capabilities (such as older OpenAI models) require additional prompt engineering.
-These models receive a TypeScript representation of the desired output format within their prompt, which provides a more compact specification than JSON Schema while maintaining sufficient flexibility for the system's requirements.
+These models receive a TypeScript representation of the desired output format within their prompt, which provides a more compact specification than JSON Schema while maintaining sufficient flexibility for the requirements of the system.
 Since these models are trained to output code formatted as Markdown, they typically wrap JSON responses in code blocks, requiring the removal of Markdown formatting from the beginning and end of the response.
 While prompt engineering techniques were explored to eliminate this behavior during development, they proved inconsistent across different queries and contexts, whereas simple string trimming provides a reliable solution for extracting the JSON content.
 
 \section{System Architecture Details}
 
-\subsection{Phase 1}
+The following subsections detail the specific implementation of each step in our 2-phase architecture, explaining how contextual information flows through the system and how each component contributes to generating appropriate customer service responses.
+
+\subsection{Context Gathering Phase}
+\label{sec:context-gathering}
 
 The Context Gathering Phase utilizes a language model that has been specifically configured to analyze conversational context and determine the relevant information required for generating an appropriate response.
 The output structure of this phase consists of two primary components: a \textit{boolean} value that indicates whether order history should be incorporated into the context, and a nullable \textit{string} parameter that contains a search query for product retrieval.
@@ -38,15 +46,17 @@ When generating such queries, the language model is instructed to formulate quer
 This phase could also be used to synthesize the chat history to optimize Phase 2 by providing a condensed summary of the conversation; however, in this thesis we focus on shorter conversations and maximum accuracy, prioritizing the preservation of complete conversational context over computational efficiency gains from summarization.
 
 \subsection{Intermediate Phase}
+\label{sec:intermediate}
 
-When a query is generated during Phase 1, the same embedding model that was employed for the product catalog indexing converts it into an embedding, ensuring consistency in the vector space representation.
+When a query is generated during the Context Gathering phase, the same embedding model that was employed for the product catalog indexing converts it into an embedding, ensuring consistency in the vector space representation.
 A similarity search is then performed against the product catalog embeddings, with the top-N most relevant products being selected based on cosine similarity scores (a threshold is also used to avoid including unrelated information).
 These selected products, along with order information when requested, are subsequently formatted and passed to the Answer Generation Phase.
 
-\subsection{Phase 2}
+\subsection{Answer Generation Phase}
+\label{sec:answer-generation}
 
 The Answer Generation Phase receives the contextual information assembled from the previous phases along with the complete conversation history.
-In this phase, \cref{sec:prompt-engineering} has a much greater impact on the quality and effectiveness of the generated responses than in Phase 1.
+In this phase, \cref{sec:prompt-engineering} has a much greater impact on the quality and effectiveness of the generated responses than in the first phase.
 The output structure consists of multiple components:
 \begin{itemize}
     \item A \textit{Priority} enumeration that indicates the urgency level of the conversation (ranging from no urgency to urgent human intervention required)
@@ -54,14 +64,15 @@ The output structure consists of multiple components:
     \item A list of \textit{categories} that tag the conversation with relevant business classifications
     \item An \textit{actions} array (that might be empty) containing the actions the model choose to take and their parameters
 \end{itemize}
-The use of enumerations for \textit{Priority} and \textit{Mood} provides significant advantages as they effectively constrain the model's output to predefined, valid options, ensuring consistency and reliability in the structured responses while preventing the generation of unexpected or malformed values.
+The use of enumerations for \textit{Priority} and \textit{Mood} provides significant advantages as they effectively constrain the output to predefined, valid options, ensuring consistency and reliability in the structured responses while preventing the generation of unexpected or malformed values.
 
 The actions array represents a flexible and scalable architectural design that enables future system expansion.
 Currently, the system implements a single action type for sending messages; however, the framework can be trivially extended to incorporate additional action types such as tag modification or checkout creation without requiring fundamental architectural changes.
-This structured approach also enhances the model's awareness of its operational context and decision-making process.
+This structured approach also enhances the awareness of the model regarding its operational context and decision-making process.
 During the development phase, empirical observations revealed that models would sometimes misuse an old \textit{message} field for commentary or justification purposes rather than customer-facing communication, a behavior that the structured action framework effectively eliminates.
 
 \section{Model Reliability and Error Mitigation}
+\label{sec:reliability}
 
 Both model calls in the two-phase architecture implement a retry mechanism with a maximum limit of three attempts to mitigate potential failures.
 The vast majority of failures encountered during system operation occur during the deserialization process, specifically in instances where language models fail to adhere to the specified output structure formats.
